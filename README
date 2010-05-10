@@ -1,0 +1,28 @@
+a simple function which read csv files inside puppet modules.
+based on rip work on extlookup.
+
+usage:
+
+Your CSV files should be located inside your modules inside a data directory, e.g: 
+Given your module name is common common/data directory should exists.
+Then, you can define a default search order in your site.pp, e.g.:
+
+lookup_order = [
+    "%{sitemodulename}/data/hostname/%{hostname}",
+    "%{sitemodulename}/data/%{hosttype}/%{hostmode}",
+    "%{sitemodulename}/data/%{hosttype}/default",
+    "%{sitemodulename}/data/%{hostmode}",
+    "%{sitemodulename}/data/default",
+    "%{modulename}/data/%{company}",
+    "%{modulename}/data/default"
+]
+
+Where everything inside '%{..}' will be replaced with another variable content (e.g. facts).
+
+Then, in your manifest, just do:
+
+$myvar = lookup("myvar")
+
+If you would like to use a different order, you may provide it as a second argument.
+
+$myvar = lookup("myvar", ["lookhere/data/%{environment}","lookthere/data/default"
