@@ -1,9 +1,9 @@
-a simple function which read csv files inside puppet modules.
+a simple function which read yaml files inside puppet modules.
 based on rip work on extlookup.
 
 usage:
 
-Your CSV files should be located inside your modules inside a data directory, e.g: 
+Your YAML files should be located inside your modules inside a data directory, e.g: 
 Given your module name is common common/data directory should exists.
 Then, you can define a default search order in your site.pp, e.g.:
 

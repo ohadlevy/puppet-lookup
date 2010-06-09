@@ -1,4 +1,4 @@
-require 'csv'
+require 'yaml'
 module Puppet::Parser::Functions
   newfunction(:lookup, :type => :rvalue) do |args|
 
@@ -33,10 +33,10 @@ module Puppet::Parser::Functions
     env = lookupvar('environment').to_sym
     env_path = Puppet.settings.instance_variable_get(:@values)[env][:modulepath].split(":")
     begin
-      order.each do |csv_file|
+      order.each do |data_file|
         env_path.each do |module_path|
-          # where our CSV file is located at
-          file = "#{module_path}/#{csv_file}.csv"
+          # where our data file is located at
+          file = "#{module_path}/#{data_file}.yaml"
           debug "scanning if #{file} exists" if lookup_debug
           datafiles << file if File.exists?(file)
         end
@@ -46,7 +46,7 @@ module Puppet::Parser::Functions
     end
 
     debug "Found the following relevant data files: #{datafiles.join(", ")}" if lookup_debug
-    # parse our CSV files
+    # parse our data files
 
     found = false
     result = ""
@@ -55,10 +55,9 @@ module Puppet::Parser::Functions
         parser.watch_file file
         next if found
         debug "scanning #{file}" if lookup_debug
-        result = CSV.read(file).find_all{ |r| r[0] == lookup_name }
-        if result.size > 0
+        result = YAML.load_file(file)[lookup_name]
+        if result and result.size > 0
           found = true
-          result = result.first[1..-1] # result values are in a nested array, removing one layer.
           result.map! { |r| var_to_fact r } # replace values to facts if required.
           debug "Found: #{result} at #{file}" if lookup_debug
         end
