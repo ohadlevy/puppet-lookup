@@ -56,12 +56,11 @@ ylookup("examplelist") will return ["cat,dog,hampster","pig,goat,sheep","duck,go
 
 Sample puppet class:
 
-Here is a quick example of looking up an array of csv data and processing it within puppet to extract each value.
+Here is a quick example of looking up an array of string data (which just happens to be comma seperated) and splitting to extract each value in turn. This technique  can be useful in many ways (for example, maintaining a list of shares, mountpoints and mount_options which puppet can then ensure are mounted )
 
 *** Start of puppet example ***
 
 class example_yaml_lookup {
-
 
 $examplelist = ylookup("examplelist")
 
