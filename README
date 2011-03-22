@@ -28,8 +28,6 @@ If you would like to use a different order, you may provide it as a second argum
 
 $myvar = lookup("myvar", ["lookhere/data/%{environment}","lookthere/data/default"]
 
-To install the 
-
 Examples: 
 To help those starting out with YAML and puppet, here are a few examples.
 
