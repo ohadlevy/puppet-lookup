@@ -1,7 +1,8 @@
-a simple function which read yaml files inside puppet modules.
+A simple function which read yaml files inside puppet modules.
 based on rip work on extlookup.
 
 usage:
+The ylookup.rb code should be copied into /usr/lib/ruby/site_ruby/1.8/puppet/parser/functions/ylookup.rb
 
 Your YAML files should be located inside your modules inside a data directory, e.g: 
 Given your module name is common common/data directory should exists.
@@ -25,4 +26,76 @@ $myvar = lookup("myvar")
 
 If you would like to use a different order, you may provide it as a second argument.
 
-$myvar = lookup("myvar", ["lookhere/data/%{environment}","lookthere/data/default"
+$myvar = lookup("myvar", ["lookhere/data/%{environment}","lookthere/data/default"]
+
+To install the 
+
+Examples: 
+To help those starting out with YAML and puppet, here are a few examples.
+
+*** Start of YAML example data file ***
+
+singlevalue : legs
+
+examplestring :
+  Here is a line of 
+  text which spans
+  multiple lines
+
+examplelist: 
+ - cat,dog,hampster
+ - pig,goat,sheep
+ - duck,goose,swan
+ - ant,beetle,millepede
+
+*** End of YAML example data file ***
+
+Usage: 
+
+ylookup("singlevalue") will return "legs" 
+ylookup("examplestring") will return "Here is a line of text which spans multiple lines" 
+ylookup("examplelist") will return ["cat,dog,hampster","pig,goat,sheep","duck,goose,swan","ant,beetle,millepede"] 
+
+Sample puppet class:
+
+Here is a quick example of looking up an array of csv data and processing it within puppet to extract each value.
+
+*** Start of puppet example ***
+
+class example_yaml_lookup {
+
+
+$examplelist = ylookup("examplelist")
+
+define do_stuff () {
+        $param0=inline_template('<%= name.split(",")[0] %>')
+        $param1=inline_template('<%= name.split(",")[1] %>')
+        $param2=inline_template('<%= name.split(",")[2] %>')
+        notify{"parma0: ${param0} - param1:  ${param1} - param2: ${param2}":}
+}
+
+do_stuff { $examplelist: }
+
+
+*** End of puppet example code ***
+
+
+Here is the expected output on a puppet client.
+
+*** Expected output when puppet runs ***
+
+[root@rhel6-puppettest puppet-lookup]# puppetd -t
+info: Caching catalog for <computer_name>
+info: Applying configuration version '1300797371'
+notice: parma0: cat - param1:  dog - param2: hampster
+notice: /Stage[main]/Example_yaml_lookup/example_yaml_lookup::Do_stuff[cat,dog,hampster]/Notify[parma0: cat - param1:  dog - param2: hampster]/message: defined 'message' as 'parma0: cat - param1:  dog - param2: hampster'
+notice: parma0: pig - param1:  goat - param2: sheep
+notice: /Stage[main]/Example_yaml_lookup/Example_yaml_lookup::Do_stuff[pig,goat,sheep]/Notify[parma0: pig - param1:  goat - param2: sheep]/message: defined 'message' as 'parma0: pig - param1:  goat - param2: sheep'
+notice: parma0: duck - param1:  goose - param2: swan
+notice: /Stage[main]/Example_yaml_lookup/Example_yaml_lookup::Do_stuff[duck,goose,swan]/Notify[parma0: duck - param1:  goose - param2: swan]/message: defined 'message' as 'parma0: duck - param1:  goose - param2: swan'
+notice: parma0: ant - param1:  beetle - param2: millepede
+notice: /Stage[main]/Example_yaml_lookup/Example_yaml_lookup::Do_stuff[ant,beetle,millepede]/Notify[parma0: ant - param1:  beetle - param2: millepede]/message: defined 'message' as 'parma0: ant - param1:  beetle - param2: millepede'
+notice: Finished catalog run in 2.05 seconds
+
+*** End of expected output when puppet runs ***
+
