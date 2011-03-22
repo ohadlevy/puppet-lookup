@@ -1,6 +1,6 @@
 require 'yaml'
 module Puppet::Parser::Functions
-  newfunction(:lookup, :type => :rvalue) do |args|
+  newfunction(:ylookup, :type => :rvalue) do |args|
 
     # we parse the precedence here because the best place to specify
     # it would be in site.pp but site.pp is only evaluated at startup
@@ -58,7 +58,7 @@ module Puppet::Parser::Functions
         result = YAML.load_file(file)[lookup_name]
         if result and result.size > 0
           found = true
-          result.map! { |r| var_to_fact r } # replace values to facts if required.
+          result.to_a.map! { |r| var_to_fact r } # replace values to facts if required.
           debug "Found: #{result} at #{file}" if lookup_debug
         end
       rescue
