@@ -19,9 +19,10 @@ module Puppet::Parser::Functions
 
     # what are we looking for?
     lookup_name = args[0]
-    lookup_order = lookupvar('lookup_order') # will always return a string / array (even an empty one)
+    default = args[1]
+    lookup_order = lookupvar('yaml_lookup_order') # will always return a string / array (even an empty one)
     # hacky hacky line, but otherwise the value of lookup_order inside puppet will be changed!!
-    order = (args[1] || lookup_order).to_a.join("!LoOKUpp!").split("!LoOKUpp!")
+    order = (args[2] || lookup_order).to_a.join("!LoOKUpp!").split("!LoOKUpp!")
 
     raise Puppet::ParseError, "Unable to find any lookup order make sure you install it in site.pp" if order.nil? or order.empty?
 
@@ -30,8 +31,12 @@ module Puppet::Parser::Functions
 
     # search through puppet module path and lookup order
     datafiles = Array.new
-    env = lookupvar('environment').to_sym
-    env_path = Puppet.settings.instance_variable_get(:@values)[env][:modulepath].split(":")
+    
+    ## Modified by Jim Conner - Use the same extlookup_datadir that we store our CSV data inside of.
+    #env = lookupvar('environment').to_sym
+    #env_path = Puppet.settings.instance_variable_get(:@values)[env][:modulepath].split(":")
+    env_path = lookupvar('extlookup_datadir')
+
     begin
       order.each do |data_file|
         env_path.each do |module_path|
@@ -52,12 +57,13 @@ module Puppet::Parser::Functions
     result = ""
     datafiles.each do |file|
       begin
-        parser.watch_file file
+        #parser.watch_file file
         next if found
         debug "scanning #{file}" if lookup_debug
         result = YAML.load_file(file)[lookup_name]
         if result and result.size > 0
           found = true
+          #result.map! { |r| var_to_fact r } # replace values to facts if required.
           result.to_a.map! { |r| var_to_fact r } # replace values to facts if required.
           debug "Found: #{result} at #{file}" if lookup_debug
         end
@@ -67,7 +73,11 @@ module Puppet::Parser::Functions
     end
 
     if not found or result.size == 0
-      raise Puppet::ParseError, "unable to find value for #{lookup_name}"
+	if default
+	  return default
+        else 
+          raise Puppet::ParseError, "unable to find value for #{lookup_name}"
+        end
     else
       return result.size == 1 ? result.to_s : result
     end
