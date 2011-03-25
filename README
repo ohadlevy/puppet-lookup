@@ -22,11 +22,16 @@ Where everything inside '%{..}' will be replaced with another variable content (
 
 Then, in your manifest, just do:
 
-$myvar = lookup("myvar")
+$myvar = ylookup("myvar")
 
-If you would like to use a different order, you may provide it as a second argument.
+If you would like a default value returned in case a lookup fails, you can provide it as a second argument.
 
-$myvar = lookup("myvar", ["lookhere/data/%{environment}","lookthere/data/default"]
+$myvar = ylookup("myvar", "default_value")
+
+
+If you would like to use a different order, you may provide it as a third argument.
+
+$myvar = ylookup("myvar", "default_value", ["lookhere/data/%{environment}","lookthere/data/default"])
 
 Examples: 
 To help those starting out with YAML and puppet, here are a few examples.
