@@ -32,10 +32,8 @@ module Puppet::Parser::Functions
     # search through puppet module path and lookup order
     datafiles = Array.new
     
-    ## Modified by Jim Conner - Use the same extlookup_datadir that we store our CSV data inside of.
-    #env = lookupvar('environment').to_sym
-    #env_path = Puppet.settings.instance_variable_get(:@values)[env][:modulepath].split(":")
-    env_path = lookupvar('extlookup_datadir')
+    env = lookupvar('environment').to_sym
+    env_path = Puppet.settings.instance_variable_get(:@values)[env][:modulepath].split(":")
 
     begin
       order.each do |data_file|
