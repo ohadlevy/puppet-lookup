@@ -46,13 +46,41 @@ examplelist:
  - duck,goose,swan
  - ant,beetle,millepede
 
+hash_of_hashes:
+ subhash_key : subhash1_value
+ subhash_key : subhash2_value 
+ 
+array_of_hashes:
+ - hash_key_A : value_A
+   hash_key_B : value_B
+ - hash_key_A : value_C
+   hash_key_B : value_D
+
+# recursive variable example
+my_app_config_dir : /etc/my_app
+my_app_conf : %{my_app_config_dir}/my_app.conf
+
 *** End of YAML example data file ***
 
 Usage: 
 
+
+In a Manifest (.pp):
+
 ylookup("singlevalue") will return "legs" 
 ylookup("examplestring") will return "Here is a line of text which spans multiple lines" 
 ylookup("examplelist") will return ["cat,dog,hampster","pig,goat,sheep","duck,goose,swan","ant,beetle,millepede"] 
+
+
+In a Template (.erb):
+
+<%= scope.function_ylookup(["singlevalue","default"]) %>
+
+<%= scope.function_lookup(["array_of_hashes"]).each do |hash| -%>
+  'hash_key_A' is set to value <%= hash['hash_key_A'] %>
+<% end -%>
+
+
 
 Sample puppet class:
 
@@ -95,4 +123,29 @@ notice: /Stage[main]/Example_yaml_lookup/Example_yaml_lookup::Do_stuff[ant,beetl
 notice: Finished catalog run in 2.05 seconds
 
 *** End of expected output when puppet runs ***
+
+*** Debugging ***
+
+You can debug the behavior of ylookup() using several variables in your manifest (generally site.pp):
+
+$lookup_debug = true		# General debugging (all debugging is enabled)
+$lookup_file_debug = true	# File lookup debugging only - print what files are being read
+$lookup_hash_debug = true	# Debug hashes - print their keys and their values
+$lookup_type_debug = true	# Debug return types - print the type (scalar, array, hash, number) of the value being returned.
+
+You must run your puppetmaster in debug mode to view the debug output. E.g.
+
+  puppet master --debug --no-daemonize
+
+*** End of Debugging ***
+
+*** Known issues ***
+
+* Debug output for arrays and hashes is flattened. E.g. 'element1element2' or 'keyvalue'
+* Numbers are returned as integers or floating point, not strings. Work around: surround value in YAML with quotes (' or ").
+* Use of common Ruby idioms are likely lacking
+* Debugging variables could/should be coalesced into something more expressive.
+* var_to_fact() debug variable is local, not global.  
+
+*** End of Known issues ***
 
