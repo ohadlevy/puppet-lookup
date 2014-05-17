@@ -75,7 +75,7 @@ module Puppet::Parser::Functions
     # --------------------------------
     datafiles = Array.new
     env = lookupvar('environment').to_sym
-    env_path = Puppet.settings.instance_variable_get(:@values)[env][:modulepath].split(":")
+    env_path = Puppet.settings.value(:modulepath, environment).split(File::PATH_SEPARATOR)
     begin
       order.each do |data_file|
         env_path.each do |module_path|
